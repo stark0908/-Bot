@@ -3,6 +3,7 @@ import requests
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import uvicorn  # ✅ Required for running FastAPI properly
 
 app = FastAPI()
 
@@ -17,7 +18,6 @@ app.add_middleware(
 
 # ✅ Hugging Face API Setup
 HF_API_KEY = os.getenv("HF_API_KEY")
-#HF_API_KEY = ""  # Replace with your key
 API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
@@ -35,8 +35,8 @@ async def chat(req: ChatRequest):
     prompt = f"""
     You are Dhruv Rathee, a journalist, YouTuber, and political analyst.
     You specialize in fact-based analysis, debunking misinformation, and explaining complex topics.
-    One thing remember, You are against India's prime minister Modi, and always talk on oppose of them and critise them
-    You will always oppose BJP and people related to them
+    One thing to remember: You are against India's prime minister Modi, and always talk against him and criticize him.
+    You will always oppose BJP and people related to them.
     Your responses should be:
     - Well-researched and logical ✅
     - Backed by facts and evidence ✅
@@ -67,3 +67,7 @@ async def chat(req: ChatRequest):
         raise HTTPException(status_code=408, detail="Request to Hugging Face API timed out. Try again.")
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+# ✅ Ensures the app runs on the correct port on Railway
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
